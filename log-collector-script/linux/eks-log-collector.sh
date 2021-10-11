@@ -20,13 +20,12 @@ export LANG="C"
 export LC_ALL="C"
 
 # Global options
-readonly PROGRAM_VERSION="0.6.2"
+readonly PROGRAM_VERSION="0.6.1"
 readonly PROGRAM_SOURCE="https://github.com/awslabs/amazon-eks-ami/blob/master/log-collector-script/"
 readonly PROGRAM_NAME="$(basename "$0" .sh)"
 readonly PROGRAM_DIR="/opt/log-collector"
 readonly LOG_DIR="/var/log"
-readonly COLLECT_DIR="/tmp/eks-log-collector"
-readonly CURRENT_TIME=$(date --utc +%Y-%m-%d_%H%M-%Z)
+readonly COLLECT_DIR="/tmp/${PROGRAM_NAME}"
 readonly DAYS_10=$(date -d "-10 days" '+%Y-%m-%d %H:%M')
 INSTANCE_ID=""
 INIT_TYPE=""
@@ -219,12 +218,7 @@ is_diskfull() {
 }
 
 cleanup() {
-  #guard rails to avoid accidental deletion of unknown data
-  if [[ "${COLLECT_DIR}" == "/tmp/eks-log-collector" ]]; then
-    rm --recursive --force "${COLLECT_DIR}" >/dev/null 2>&1
-  else
-    echo "Unable to Cleanup as {COLLECT_DIR} variable is modified. Please cleanup manually!"
-  fi
+  rm --recursive --force "${COLLECT_DIR}" >/dev/null 2>&1
 }
 
 init() {
@@ -263,14 +257,14 @@ collect() {
 pack() {
   try "archive gathered information"
 
-  tar --create --verbose --gzip --file "${LOG_DIR}"/eks_"${INSTANCE_ID}"_"${CURRENT_TIME}"_"${PROGRAM_VERSION}".tar.gz --directory="${COLLECT_DIR}" . > /dev/null 2>&1
+  tar --create --verbose --gzip --file "${LOG_DIR}"/eks_"${INSTANCE_ID}"_"$(date --utc +%Y-%m-%d_%H%M-%Z)"_"${PROGRAM_VERSION}".tar.gz --directory="${COLLECT_DIR}" . > /dev/null 2>&1
 
   ok
 }
 
 finished() {
   cleanup
-  echo -e "\n\tDone... your bundled logs are located in ${LOG_DIR}/eks_${INSTANCE_ID}_${CURRENT_TIME}_${PROGRAM_VERSION}.tar.gz\n"
+  echo -e "\n\tDone... your bundled logs are located in ${LOG_DIR}/eks_${INSTANCE_ID}_$(date --utc +%Y-%m-%d_%H%M-%Z)_${PROGRAM_VERSION}.tar.gz\n"
 }
 
 get_mounts_info() {
@@ -399,7 +393,7 @@ get_k8s_info() {
     KUBECONFIG="/var/lib/kubelet/kubeconfig"
     command -v kubectl > /dev/null && kubectl get --kubeconfig=${KUBECONFIG} svc > "${COLLECT_DIR}"/kubelet/svc.log
     command -v kubectl > /dev/null && kubectl --kubeconfig=${KUBECONFIG} config view  --output yaml > "${COLLECT_DIR}"/kubelet/kubeconfig.yaml
-
+  
   else
     echo "======== Unable to find KUBECONFIG, IGNORING POD DATA =========" >> "${COLLECT_DIR}"/kubelet/svc.log
   fi
@@ -443,9 +437,6 @@ get_ipamd_info() {
     echo "Ignoring Prometheus Metrics collection as mentioned"| tee -a "${COLLECT_DIR}"/ipamd/ipam_metrics_ignore.txt
   fi
 
-  try "collect L-IPAMD checkpoint"
-  cp /var/run/aws-node/ipam.json "${COLLECT_DIR}"/ipamd/ipam.json
-
   ok
 }
 
@@ -459,12 +450,6 @@ get_sysctls_info() {
 
 get_networking_info() {
   try "collect networking infomation"
-
-  # conntrack info
-  echo "*** Output of conntrack -S *** " >> "${COLLECT_DIR}"/networking/conntrack.txt
-  timeout 75 conntrack -S >> "${COLLECT_DIR}"/networking/conntrack.txt
-  echo "*** Output of conntrack -L ***" >> "${COLLECT_DIR}"/networking/conntrack.txt
-  timeout 75 conntrack -L >> "${COLLECT_DIR}"/networking/conntrack.txt
 
   # ifconfig
   timeout 75 ifconfig > "${COLLECT_DIR}"/networking/ifconfig.txt
