@@ -191,7 +191,6 @@ sudo systemctl enable iptables-restore
 === Euh, JOKER ? ===
 INSTALL_DOCKER="${INSTALL_DOCKER:-true}"
 if [[ "$INSTALL_DOCKER" == "true" ]]; then
-<<<<<<< HEAD
     # install version lock to put a lock on dependecies
     sudo yum install -y yum-plugin-versionlock
 
@@ -206,8 +205,6 @@ if [[ "$INSTALL_DOCKER" == "true" ]]; then
     # install docker and lock version
     sudo yum install -y docker-${DOCKER_VERSION}*
     sudo yum versionlock docker-*
-=======
->>>>>>> 61bc8eb (OneUp: Init custom AMI)
     sudo usermod -aG docker $USER
 
     sudo mkdir -p /etc/docker
