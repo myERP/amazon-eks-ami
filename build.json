@@ -151,7 +151,11 @@
       "type": "shell",
       "remote_folder": "{{ user `remote_folder`}}",
       "expect_disconnect": true,
-      "script": "{{template_dir}}/scripts/upgrade_kernel.sh"
+      "script": "{{template_dir}}/scripts/upgrade_kernel.sh",
+      "environment_vars": [
+        "KUBERNETES_VERSION={{user `kubernetes_version`}}",
+        "KERNEL_VERSION={{user `kernel_version`}}"
+      ]
     },
     {
       "type": "shell",
@@ -164,7 +168,8 @@
         "BINARY_BUCKET_NAME={{user `binary_bucket_name`}}",
         "BINARY_BUCKET_REGION={{user `binary_bucket_region`}}",
         "DOCKER_VERSION={{user `docker_version`}}",
-        "CNI_VERSION={{user `cni_version`}}",
+        "CONTAINERD_VERSION={{user `containerd_version`}}",
+        "RUNC_VERSION={{user `runc_version`}}",
         "CNI_PLUGIN_VERSION={{user `cni_plugin_version`}}",
         "PULL_CNI_FROM_GITHUB={{user `pull_cni_from_github`}}",
         "AWS_ACCESS_KEY_ID={{user `aws_access_key_id`}}",

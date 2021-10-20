@@ -316,7 +316,7 @@ else
 fi
 
 PAUSE_CONTAINER_ACCOUNT=$(get_pause_container_account_for_region "${AWS_DEFAULT_REGION}")
-PAUSE_CONTAINER_IMAGE=${PAUSE_CONTAINER_IMAGE:-$PAUSE_CONTAINER_ACCOUNT.dkr.ecr.$AWS_DEFAULT_REGION.$AWS_SERVICES_DOMAIN/eks/pause-${ARCH}}
+PAUSE_CONTAINER_IMAGE=${PAUSE_CONTAINER_IMAGE:-$PAUSE_CONTAINER_ACCOUNT.dkr.ecr.$AWS_DEFAULT_REGION.$AWS_SERVICES_DOMAIN/eks/pause}
 PAUSE_CONTAINER="$PAUSE_CONTAINER_IMAGE:$PAUSE_CONTAINER_VERSION"
 
 ### kubelet kubeconfig
@@ -441,11 +441,11 @@ if [[ "$CONTAINER_RUNTIME" = "containerd" ]]; then
     
 elif [[ "$CONTAINER_RUNTIME" = "dockerd" ]]; then
     mkdir -p /etc/docker
-    bash -c "/sbin/iptables-save > /etc/sysconfig/iptables"
-    mv /etc/eks/iptables-restore.service /etc/systemd/system/iptables-restore.service
-    sudo chown root:root /etc/systemd/system/iptables-restore.service
-    systemctl daemon-reload
-    systemctl enable iptables-restore
+    # bash -c "/sbin/iptables-save > /etc/sysconfig/iptables"  ALREADY DONE IN INSTALL-WORKER.SH
+    # mv /etc/eks/iptables-restore.service /etc/systemd/system/iptables-restore.service
+    # sudo chown root:root /etc/systemd/system/iptables-restore.service
+    # systemctl daemon-reload
+    # systemctl enable iptables-restore
 
     if [[ -n "$DOCKER_CONFIG_JSON" ]]; then
         echo "$DOCKER_CONFIG_JSON" > /etc/docker/daemon.json

@@ -26,10 +26,10 @@ validate_env_set BINARY_BUCKET_REGION
 validate_env_set DOCKER_VERSION
 validate_env_set CONTAINERD_VERSION
 validate_env_set RUNC_VERSION
-validate_env_set CNI_VERSION
 validate_env_set CNI_PLUGIN_VERSION
 validate_env_set KUBERNETES_VERSION
 validate_env_set KUBERNETES_BUILD_DATE
+validate_env_set PULL_CNI_FROM_GITHUB
 
 ################################################################################
 ### Machine Architecture #######################################################
@@ -138,7 +138,7 @@ elif [ "$OS" == "al2" ]; then
   if yum list installed | grep ec2-net-utils; then sudo yum remove ec2-net-utils -y -q; fi
 
   curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
-  sudo python get-pip.py
+  sudo python3 get-pip.py
   rm get-pip.py
 
   sudo yum install -y yum-utils device-mapper-persistent-data lvm2
@@ -188,7 +188,6 @@ sudo systemctl enable iptables-restore
 ################################################################################
 
 
-=== Euh, JOKER ? ===
 INSTALL_DOCKER="${INSTALL_DOCKER:-true}"
 if [[ "$INSTALL_DOCKER" == "true" ]]; then
     # install version lock to put a lock on dependecies
@@ -262,18 +261,6 @@ sudo mkdir -p /etc/kubernetes/manifests
 sudo mkdir -p /var/lib/kubernetes
 sudo mkdir -p /var/lib/kubelet
 sudo mkdir -p /opt/cni/bin
-
-wget https://github.com/containernetworking/cni/releases/download/${CNI_VERSION}/cni-${ARCH}-${CNI_VERSION}.tgz
-wget https://github.com/containernetworking/cni/releases/download/${CNI_VERSION}/cni-${ARCH}-${CNI_VERSION}.tgz.sha512
-sudo sha512sum -c cni-${ARCH}-${CNI_VERSION}.tgz.sha512
-sudo tar -xvf cni-${ARCH}-${CNI_VERSION}.tgz -C /opt/cni/bin
-rm cni-${ARCH}-${CNI_VERSION}.tgz cni-${ARCH}-${CNI_VERSION}.tgz.sha512
-
-wget https://github.com/containernetworking/plugins/releases/download/${CNI_PLUGIN_VERSION}/cni-plugins-${ARCH}-${CNI_PLUGIN_VERSION}.tgz
-wget https://github.com/containernetworking/plugins/releases/download/${CNI_PLUGIN_VERSION}/cni-plugins-${ARCH}-${CNI_PLUGIN_VERSION}.tgz.sha512
-sudo sha512sum -c cni-plugins-${ARCH}-${CNI_PLUGIN_VERSION}.tgz.sha512
-sudo tar -xvf cni-plugins-${ARCH}-${CNI_PLUGIN_VERSION}.tgz -C /opt/cni/bin
-rm cni-plugins-${ARCH}-${CNI_PLUGIN_VERSION}.tgz cni-plugins-${ARCH}-${CNI_PLUGIN_VERSION}.tgz.sha512
 
 echo "Downloading binaries from: s3://$BINARY_BUCKET_NAME"
 S3_DOMAIN="amazonaws.com"
@@ -383,7 +370,6 @@ ARCH="$(uname -m)"
 EOF
 sudo mv /tmp/release /etc/eks/release
 
-=== POURQUOI ON A MIS LE CLEANUP DANS CLEANUP_ADDITIONAL_REPO NOUS ?? ===
 sudo chown -R root:root /etc/eks
 
 ################################################################################
