@@ -5,6 +5,22 @@ custom Amazon EKS AMI with [HashiCorp Packer](https://www.packer.io/). This is
 the same configuration that Amazon EKS uses to create the official Amazon
 EKS-optimized AMI.
 
+## OneUP
+
+This is a forked repository with custom modifications.
+
+To get latest changes, execute the following:
+
+```
+git remote add official git@github.com:awslabs/amazon-eks-ami.git  # Add official repository reference (Only once)
+git fetch official                # Get all new references
+git checkout official/master      # Change branch to official repo
+git describe --abbrev=0 --tags `git rev-list --tags --max-count=3`      # Get latest tags (in all repo/branches)
+git pull official <tag>           # Pull changes from latest release tag
+```
+
+When you commit **do not forget** to start your commit comment with "OneUp:" to easily find our changes.
+
 ## Setup
 
 You must have [Packer](https://www.packer.io/) installed on your local system.
