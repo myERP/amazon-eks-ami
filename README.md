@@ -9,6 +9,8 @@ EKS-optimized AMI.
 
 This is a forked repository with custom modifications.
 
+### Get latest changes
+
 To get latest changes, execute the following:
 
 ```
@@ -20,6 +22,17 @@ git pull official <tag>           # Pull changes from latest release tag
 ```
 
 When you commit **do not forget** to start your commit comment with "OneUp:" to easily find our changes.
+
+### Build custom AMI
+
+To build a custom AMI for OneUp cluster execute the following:
+
+```
+export HARDENING_DIR="/absolute/path/to/oneup-packer/infra-kube/ansible/"
+AWS_PROFILE=oneup make version
+```
+
+Note that `oneup` is an example and it could be any of OneUp customers platform, and `version` should be the targeted Kubernetes version. The version is one of the versions in the Makefile.
 
 ## Setup
 
